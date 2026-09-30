@@ -175,9 +175,38 @@ export function usePacmanGame(initialApiKey?: string) {
     [apiKey]
   );
 
+  // Manual direction application handler (Keyboard & UI controls)
+  const applyManualDirection = useCallback((newDir: Direction) => {
+    if (newDir === "NONE") return;
+    const p = stateRef.current.pacman;
+    const curMap = stateRef.current.mapState;
+    const curGridX = Math.round(p.x);
+    const curGridY = Math.round(p.y);
+
+    p.nextDirection = newDir;
+
+    // Immediate 180-degree reversal
+    if (p.direction !== "NONE" && newDir === getOppositeDirection(p.direction)) {
+      p.direction = newDir;
+    } else if (p.direction === "NONE") {
+      const offset = getDirectionOffset(newDir);
+      if (isPassableForPacman(curGridX + offset.x, curGridY + offset.y, curMap)) {
+        p.direction = newDir;
+      }
+    }
+
+    if (stateRef.current.isPaused) {
+      stateRef.current.isPaused = false;
+      setIsPaused(false);
+    }
+  }, []);
+
   // Manual keydown listener for Manual Mode
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      if (target?.tagName === "INPUT" || target?.tagName === "TEXTAREA") return;
+
       let newDir: Direction = "NONE";
       if (e.key === "ArrowUp" || e.key === "w" || e.key === "W") newDir = "UP";
       else if (e.key === "ArrowDown" || e.key === "s" || e.key === "S") newDir = "DOWN";
@@ -185,16 +214,14 @@ export function usePacmanGame(initialApiKey?: string) {
       else if (e.key === "ArrowRight" || e.key === "d" || e.key === "D") newDir = "RIGHT";
 
       if (newDir !== "NONE") {
-        stateRef.current.pacman.nextDirection = newDir;
-        if (stateRef.current.isPaused) {
-          setIsPaused(false);
-        }
+        e.preventDefault();
+        applyManualDirection(newDir);
       }
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [applyManualDirection]);
 
   // Main 60 FPS Game Loop
   useEffect(() => {
@@ -546,5 +573,6 @@ export function usePacmanGame(initialApiKey?: string) {
     setSpeedMultiplier,
     setAiVisionOverlay,
     setApiKey,
+    onManualDirection: applyManualDirection,
   };
 }

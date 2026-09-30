@@ -7,12 +7,12 @@ import { GameHeader } from "@/components/GameHeader";
 import { GameControls } from "@/components/GameControls";
 import { JevStatusBar } from "@/components/JevStatusBar";
 import { ApiKeyModal } from "@/components/ApiKeyModal";
-import { ChevronDown, ChevronRight, Cpu, Info } from "lucide-react";
+import { JevMechanicsDrawer } from "@/components/JevMechanicsDrawer";
 
 export default function PacmanPage() {
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
+  const [isMechanicsOpen, setIsMechanicsOpen] = useState(false);
   const [persistedKey, setPersistedKey] = useState<string>("");
-  const [showRawState, setShowRawState] = useState(false);
 
   useEffect(() => {
     // Check localStorage on mount
@@ -42,6 +42,7 @@ export default function PacmanPage() {
     setSpeedMultiplier,
     setAiVisionOverlay,
     setApiKey,
+    onManualDirection,
   } = usePacmanGame(persistedKey);
 
   const handleSaveKey = (newKey: string) => {
@@ -54,25 +55,26 @@ export default function PacmanPage() {
     }
   };
 
-  // Expanded tile size for maximum visibility and presence
-  const TILE_SIZE = 22;
-  const boardWidthPx = 28 * TILE_SIZE; // 616px
+  // High-precision tile size calibrated for single-viewport fit (532px x 589px)
+  const TILE_SIZE = 19;
+  const boardWidthPx = 28 * TILE_SIZE; // 532px
 
   return (
-    <div className="flex min-h-screen flex-col bg-neutral-100 text-neutral-900 bg-grid-pattern">
-      {/* Header */}
+    <div className="h-screen w-screen overflow-hidden flex flex-col bg-neutral-100 text-neutral-900 bg-grid-pattern select-none">
+      {/* Sleek Fixed Header */}
       <GameHeader
         stats={stats}
         lives={pacman.lives}
         onOpenSettings={() => setApiKeyModalOpen(true)}
+        onOpenMechanics={() => setIsMechanicsOpen(true)}
         hasApiKey={Boolean(apiKey || persistedKey)}
       />
 
-      {/* Centered Main Game Arena */}
-      <main className="flex flex-1 flex-col items-center justify-center p-4 sm:p-6">
+      {/* Centered Main Game Stage */}
+      <main className="flex flex-1 flex-col items-center justify-center p-2 sm:p-3 overflow-hidden">
         <div
-          className="flex flex-col items-center space-y-3.5"
-          style={{ width: "100%", maxWidth: `${boardWidthPx + 32}px` }}
+          className="flex flex-col items-center space-y-2"
+          style={{ width: "100%", maxWidth: `${boardWidthPx + 24}px` }}
         >
           {/* Top JEV System One Live Status Ribbon */}
           <div className="w-full">
@@ -82,8 +84,8 @@ export default function PacmanPage() {
             />
           </div>
 
-          {/* Centered Expanded Game Canvas */}
-          <div className="flex justify-center shadow-lg rounded-2xl">
+          {/* Centered Game Canvas */}
+          <div className="flex justify-center shadow-md rounded-xl">
             <GameCanvas
               mapState={mapState}
               pacman={pacman}
@@ -94,7 +96,7 @@ export default function PacmanPage() {
             />
           </div>
 
-          {/* Centered Game Controls */}
+          {/* Compact Centered Game Controls */}
           <div className="w-full">
             <GameControls
               isPaused={isPaused}
@@ -109,61 +111,19 @@ export default function PacmanPage() {
               onSetMode={setMode}
               onSetSpeed={setSpeedMultiplier}
               onToggleAiVision={() => setAiVisionOverlay(!aiVisionOverlay)}
+              onManualDirection={onManualDirection}
             />
-          </div>
-
-          {/* Collapsible Architecture & Raw State Details */}
-          <div className="w-full rounded-xl border border-neutral-200 bg-white p-3.5 shadow-xs text-xs text-neutral-600">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 font-medium text-neutral-800">
-                <Info className="h-3.5 w-3.5 text-neutral-600" />
-                <span>Autonomous JEV System One Mechanics</span>
-              </div>
-              {latestDecision && (
-                <button
-                  onClick={() => setShowRawState(!showRawState)}
-                  className="flex items-center space-x-1 text-[11px] font-medium text-neutral-500 hover:text-neutral-900"
-                >
-                  <Cpu className="h-3 w-3" />
-                  <span>{showRawState ? "Hide JSON State" : "View Raw JSON State"}</span>
-                  {showRawState ? <ChevronDown className="h-3 w-3" /> : <ChevronRight className="h-3 w-3" />}
-                </button>
-              )}
-            </div>
-
-            <p className="mt-1 text-[11px] leading-relaxed text-neutral-500">
-              Pac-Man evaluates junctions using TypeSafe&apos;s <span className="font-mono font-medium text-neutral-800">jev-latest</span> System One model. Predictive lookahead eliminates stutter by evaluating upcoming turns before arrival.
-            </p>
-
-            {/* Ghost monochrome style guide */}
-            <div className="mt-2.5 grid grid-cols-4 gap-2 pt-2 border-t border-neutral-100 text-[10px] font-mono text-center">
-              <div className="rounded bg-neutral-50 p-1 border border-neutral-200">
-                <div className="font-bold text-neutral-900">Blinky</div>
-                <div className="text-neutral-500">Solid Black</div>
-              </div>
-              <div className="rounded bg-neutral-50 p-1 border border-neutral-200">
-                <div className="font-bold text-neutral-900">Pinky</div>
-                <div className="text-neutral-500">Dotted</div>
-              </div>
-              <div className="rounded bg-neutral-50 p-1 border border-neutral-200">
-                <div className="font-bold text-neutral-900">Inky</div>
-                <div className="text-neutral-500">Striped</div>
-              </div>
-              <div className="rounded bg-neutral-50 p-1 border border-neutral-200">
-                <div className="font-bold text-neutral-900">Clyde</div>
-                <div className="text-neutral-500">Hatched</div>
-              </div>
-            </div>
-
-            {/* Raw JSON State Dropdown */}
-            {showRawState && latestDecision && (
-              <pre className="mt-3 max-h-48 overflow-auto rounded-lg bg-neutral-900 p-2.5 font-mono text-[10px] leading-relaxed text-neutral-200">
-                {JSON.stringify(latestDecision.raw_state, null, 2)}
-              </pre>
-            )}
           </div>
         </div>
       </main>
+
+      {/* Slide-over JEV Mechanics & Raw State Drawer (Option A) */}
+      <JevMechanicsDrawer
+        isOpen={isMechanicsOpen}
+        onClose={() => setIsMechanicsOpen(false)}
+        decision={latestDecision}
+        avgLatencyMs={stats.avgLatencyMs}
+      />
 
       {/* API Key Modal */}
       <ApiKeyModal

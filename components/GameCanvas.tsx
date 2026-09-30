@@ -19,7 +19,7 @@ export function GameCanvas({
   ghosts,
   latestDecision,
   aiVisionOverlay,
-  tileSize = 22,
+  tileSize = 19,
 }: GameCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -261,7 +261,7 @@ export function GameCanvas({
   }, [mapState, pacman, ghosts, latestDecision, aiVisionOverlay, tileSize]);
 
   return (
-    <div className="relative inline-block rounded-2xl border border-neutral-300 bg-white p-3.5 shadow-md">
+    <div className="relative inline-block rounded-xl border border-neutral-300 bg-white p-2 shadow-md">
       <canvas
         ref={canvasRef}
         style={{
