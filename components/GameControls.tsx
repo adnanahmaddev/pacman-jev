@@ -40,15 +40,14 @@ export function GameControls({
       <div className="flex items-center rounded-lg border border-neutral-200 bg-neutral-100 p-0.5 text-xs font-medium">
         <button
           onClick={() => onSetMode("AUTONOMOUS")}
-          className={`rounded-md px-2.5 py-1 transition-all ${
-            mode === "AUTONOMOUS"
+          className={`rounded-md px-2.5 py-1 transition-all ${mode === "AUTONOMOUS"
               ? "bg-white font-semibold text-neutral-900 shadow-xs"
               : "text-neutral-600 hover:text-neutral-900"
-          }`}
+            }`}
         >
           JEV Autopilot
         </button>
-        <button
+        {/* <button
           onClick={() => onSetMode("STEP")}
           className={`rounded-md px-2.5 py-1 transition-all ${
             mode === "STEP"
@@ -57,14 +56,13 @@ export function GameControls({
           }`}
         >
           Step-by-Step
-        </button>
+        </button> */}
         <button
           onClick={() => onSetMode("MANUAL")}
-          className={`rounded-md px-2.5 py-1 transition-all ${
-            mode === "MANUAL"
+          className={`rounded-md px-2.5 py-1 transition-all ${mode === "MANUAL"
               ? "bg-white font-semibold text-neutral-900 shadow-xs"
               : "text-neutral-600 hover:text-neutral-900"
-          }`}
+            }`}
         >
           Manual Keys
         </button>
@@ -157,11 +155,10 @@ export function GameControls({
             <button
               key={s}
               onClick={() => onSetSpeed(s)}
-              className={`rounded px-2 py-0.5 transition-colors ${
-                speed === s
+              className={`rounded px-2 py-0.5 transition-colors ${speed === s
                   ? "bg-neutral-900 font-bold text-white shadow-2xs"
                   : "text-neutral-500 hover:text-neutral-900"
-              }`}
+                }`}
             >
               {s}x
             </button>
@@ -171,11 +168,10 @@ export function GameControls({
         {/* AI Vision Overlay Toggle */}
         <button
           onClick={onToggleAiVision}
-          className={`flex items-center space-x-1 rounded-lg border px-2 py-1 text-xs transition-colors ${
-            aiVisionOverlay
+          className={`flex items-center space-x-1 rounded-lg border px-2 py-1 text-xs transition-colors ${aiVisionOverlay
               ? "border-neutral-300 bg-neutral-900 text-white"
               : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50"
-          }`}
+            }`}
           title="Toggle AI vectors & danger zone overlays"
         >
           {aiVisionOverlay ? (
