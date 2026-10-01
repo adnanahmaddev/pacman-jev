@@ -333,7 +333,7 @@ export function usePacmanGame(initialApiKey?: string) {
               setLatestDecision(cached);
               stateRef.current.decisionCache.delete(junctionKey);
             } else {
-              // Local fallback immediate decision
+              // Local fallback immediate movement to keep physics fluid
               const { state, candidateAnalyses } = buildJevEvaluationState(p, ghostsList, curMap);
               const fallback = simulateLocalJevDecision(state, candidateAnalyses, Date.now());
               if (
@@ -346,8 +346,14 @@ export function usePacmanGame(initialApiKey?: string) {
                 p.nextDirection = fallback.action;
                 p.direction = fallback.action;
               }
-              setLatestDecision(fallback);
-              fetchJevDecision(p, ghostsList, curMap, junctionKey);
+
+              // Only set fallback decision if no cloud query is currently in-flight
+              // to prevent rapid flickering between Cloud JEV and Local Sim
+              const hasInFlight = stateRef.current.inFlightQueries.has(junctionKey);
+              if (!hasInFlight) {
+                // If cloud is available, dispatch query and keep UI stable
+                fetchJevDecision(p, ghostsList, curMap, junctionKey);
+              }
             }
 
             if (mode === "STEP") {

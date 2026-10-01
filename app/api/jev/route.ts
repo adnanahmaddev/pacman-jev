@@ -1,6 +1,15 @@
 import { queryJevSystemOne } from "@/lib/typesafe";
 import { NextRequest, NextResponse } from "next/server";
 
+export async function GET() {
+  const hasServerKey = Boolean(process.env.TYPESAFE_API_KEY?.trim());
+  return NextResponse.json({
+    hasServerKey,
+    driver: hasServerKey ? "cloud_jev" : "local_sim",
+    model: hasServerKey ? "jev-latest" : "local-heuristic-v1",
+  });
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();

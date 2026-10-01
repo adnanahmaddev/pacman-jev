@@ -8,6 +8,7 @@ interface ApiKeyModalProps {
   onClose: () => void;
   currentKey: string;
   onSaveKey: (key: string) => void;
+  hasServerKey?: boolean;
 }
 
 export function ApiKeyModal({
@@ -15,6 +16,7 @@ export function ApiKeyModal({
   onClose,
   currentKey,
   onSaveKey,
+  hasServerKey = false,
 }: ApiKeyModalProps) {
   const [keyInput, setKeyInput] = useState(currentKey);
   const [isTesting, setIsTesting] = useState(false);
@@ -84,6 +86,15 @@ export function ApiKeyModal({
             <span className="font-mono font-medium text-neutral-800">jev-latest</span> System One model.
             If left blank, the app runs the built-in local calibrated simulator.
           </p>
+
+          {hasServerKey && (
+            <div className="flex items-center space-x-2 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs text-neutral-700">
+              <span className="h-2 w-2 rounded-full bg-emerald-600" />
+              <span>
+                Server key active via <code className="font-mono text-[10px] bg-neutral-200/70 px-1 py-0.5 rounded">.env.local</code>. You can optionally override it here.
+              </span>
+            </div>
+          )}
 
           <div>
             <label className="text-[11px] font-medium tracking-wide text-neutral-700 uppercase">

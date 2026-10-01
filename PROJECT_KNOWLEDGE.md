@@ -43,11 +43,10 @@ pacman/
 ├── components/
 │   ├── ApiKeyModal.tsx             → Modal for entering & testing TypeSafe API keys
 │   ├── GameCanvas.tsx              → HTML5 Canvas renderer (walls, pellets, ghosts, AI vision)
-│   ├── GameControls.tsx            → Mode switcher, play/pause, speed controls, D-pad
-│   ├── GameHeader.tsx              → HUD (Score, High Score, Lives), modal triggers
-│   ├── JevInspector.tsx            → Telemetry card displaying confidence, probabilities, JSON
-│   ├── JevMechanicsDrawer.tsx      → Slide-over drawer detailing System 1 mechanics & state
-│   └── JevStatusBar.tsx            → Compact real-time telemetry ribbon above canvas
+│   ├── GameControls.tsx            → Integrated bottom controls shelf with keyboard shortcuts
+│   ├── JevTelemetrySidebar.tsx     → Permanent right-side panel: Driver profile, decision meters, raw JSON
+│   ├── JevInspector.tsx            → Detailed telemetry card (utility component)
+│   └── JevMechanicsDrawer.tsx      → Historical drawer component (superseded by sidebar)
 ├── engine/
 │   ├── ghostAI.ts                  → Classic ghost targeting algorithms & state transitions
 │   ├── maze.ts                     → 28x31 maze grid, tile types, passability, junction checks
@@ -203,11 +202,12 @@ The UI uses a light, editorial design palette rather than neon arcade colors:
 
 ### Components Reference
 
-- **[`GameHeader`](file:///Users/adnanahmad/apps/projects/games/pacman/components/GameHeader.tsx)**: Displays the brand mark (`J1`), live score, high score, remaining lives (filled circle dots), Mechanics drawer trigger (`⚡ Mechanics`), and API Key status button (`API Ready` / `API Key`).
 - **[`GameCanvas`](file:///Users/adnanahmad/apps/projects/games/pacman/components/GameCanvas.tsx)**: Renders the 28x31 maze on HTML5 Canvas. Handles HiDPI Retina pixel scaling (`window.devicePixelRatio`), wall beveling, ghost texture stippling, and AI Vision vectors/danger zones.
-- **[`JevStatusBar`](file:///Users/adnanahmad/apps/projects/games/pacman/components/JevStatusBar.tsx)**: Live telemetry strip above the canvas showing the latest action arrow, confidence %, tactical intent, directional probability distribution, threat badge (`Safe`, `Low`, `Severe`, `Critical`), latency in ms, and execution tag (`Cloud JEV` vs `Local Sim`).
-- **[`GameControls`](file:///Users/adnanahmad/apps/projects/games/pacman/components/GameControls.tsx)**: Control bar supporting mode switching (`JEV Autopilot` vs `Manual Keys`), Play/Pause, Step forward, Reset, speed multipliers (`1x`, `2x`, `5x`), AI Vision overlay toggle, and on-screen directional buttons.
-- **[`JevMechanicsDrawer`](file:///Users/adnanahmad/apps/projects/games/pacman/components/JevMechanicsDrawer.tsx)**: Slide-over drawer explaining JEV System One mechanics, model metadata (`jev-latest`), prompt criteria, and a live raw state JSON viewer with copy-to-clipboard functionality.
+- **[`GameControls`](file:///Users/adnanahmad/apps/projects/games/pacman/components/GameControls.tsx)**: Integrated bottom controls shelf under the canvas frame supporting `[SPACE]` pause, Play/Pause, Step, Reset, speed multipliers (`1x`, `2x`, `3x`), and AI Vision overlay toggle.
+- **[`JevTelemetrySidebar`](file:///Users/adnanahmad/apps/projects/games/pacman/components/JevTelemetrySidebar.tsx)**: Permanent right-side telemetry panel featuring:
+  1. **Driver Card**: Dynamic driver profile reflecting active mode — **JEV System One** (`Brain` icon, Cloud JEV) when `TYPESAFE_API_KEY` is present, or **Heuristic Simulator** (`Cpu` icon, Local Sim) when absent. Includes one-click autonomous driving toggle.
+  2. **Decision Card**: Target directional move, tactical goal badge, threat rating, latency (ms), and 4 directional probability meters (`↑`, `↓`, `←`, `→`).
+  3. **Raw Telemetry Card**: Formatted JSON code snippet with one-click copy button.
 - **[`ApiKeyModal`](file:///Users/adnanahmad/apps/projects/games/pacman/components/ApiKeyModal.tsx)**: Dialog allowing users to configure their TypeSafe AI API key with live connection testing against `https://api.typesafe.ai/v1/systemone`.
 
 ---
@@ -221,8 +221,8 @@ The UI uses a light, editorial design palette rather than neon arcade colors:
 - See [`.env.example`](file:///Users/adnanahmad/apps/projects/games/pacman/.env.example) for reference.
 
 ### Next.js Route Proxy ([`app/api/jev/route.ts`](file:///Users/adnanahmad/apps/projects/games/pacman/app/api/jev/route.ts))
-- Accepts `POST` requests with `{ state, candidateAnalyses, apiKey, model }`.
-- Prioritizes client-supplied API key, then `x-typesafe-key` header, then server `process.env.TYPESAFE_API_KEY`.
+- **`GET`**: Exposes server key presence (`hasServerKey`), active driver mode (`cloud_jev` vs `local_sim`), and model name without leaking the secret key to the browser.
+- **`POST`**: Accepts requests with `{ state, candidateAnalyses, apiKey, model }`. Prioritizes client-supplied API key, then `x-typesafe-key` header, then server `process.env.TYPESAFE_API_KEY`.
 - Returns the full `JevSystemOneDecision` JSON object.
 
 ---
